@@ -73,7 +73,7 @@ const determineWinner = gameId => {
     const winningPlayer = {
       key: "",
       player: {},
-      description: winner[0].descr
+      description: winner[0].descr.replace(/'/g, "")
     };
 
     //  match winning hand with game players from api result

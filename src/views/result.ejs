@@ -8,16 +8,73 @@
 </div>
 
 <script>
-  const results = '<%= results %>';
-  const isWinner = "<%= isWinner %>";
+  const results = '<%- JSON.stringify(playerResults) %>';
+  const isWinner = '<%- isPlayerWinner %>';
+
+  let winner, losers;
 
   //*** UI Containers ***
   var losingHandContainer = {};
   var winningHandContainer = {};
 
+  //** GUI ***
+  function processWinnersHand(winner) {
+    DrawHand(winner.player.cards, document.getElementsByClassName("winning-hand-container")[0]);
+  };
+
+  function processLosingHands(losers) {
+    losers.forEach(loser => {
+      Object.keys(loser).forEach(key => {
+        DrawHand(loser[key].cards, document.getElementsByClassName("losing-hand-container")[0]);
+      });
+    });
+  };
+
+  function DrawHand(cards, container) {
+    let hand = [];
+
+    cards.forEach(card => {
+      hand.push(drawPlayingCard(card));
+    });
+
+    hand.forEach(ph => {
+      container.appendChild(ph);
+    });
+  }
+
+  function drawPlayingCard(card) {
+    const cardContainer = document.createElement("div");
+    cardContainer.className = "card-container";
+
+    const playingCard = document.createElement("div");
+    playingCard.className = "playing-card";
+
+    let img = document.createElement("img");
+    img.src = card.image;
+    playingCard.appendChild(img);
+
+    cardContainer.appendChild(playingCard);
+
+    return cardContainer;
+  }
+
+
   //*** Initialise ***
   (() => {
     const status = document.getElementsByClassName("status")[0];
-    isWinner ? status.innerHTML = "<h2>You won! :D</h2>" : status.innerHTML = "<h2>You lost! :(</h2>"
+    try {
+      console.log(results);
+      console.log(isWinner);
+
+      isWinner === 'true' ? status.innerHTML = "<h2>You won! :D</h2>" : status.innerHTML = "<h2>You lost! :(</h2>";
+
+      const x = JSON.parse(results);
+
+      processWinnersHand(x.winner);
+      processLosingHands(x.losers);
+    }
+    catch (error) {
+      console.log(error.message);
+    }
   })();
 </script>

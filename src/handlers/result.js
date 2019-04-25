@@ -4,13 +4,12 @@ const { determineWinner } = require("../lib/gameStore");
 const resultHandler = (req, h) => {
   const { gameId } = req.params;
   const playerResults = determineWinner(gameId);
-  console.log(playerResults);
-
   const isPlayerWinner = req.state.player === playerResults.winner.key;
 
+  console.log(playerResults);
   console.log(isPlayerWinner);
 
-  return h.view("result", { results: playerResults, isWinner: isPlayerWinner });
+  return h.view("result", { playerResults, isPlayerWinner });
 };
 
 module.exports = resultHandler;

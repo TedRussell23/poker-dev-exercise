@@ -81,3 +81,15 @@
     width: 100%;
     padding: 8px;
   }
+
+  .winning-hand-container{
+    display: flex;
+    flex-flow: wrap;
+    justify-content: space-evenly;
+  }
+
+  .losing-hand-container{
+    display: flex;
+    flex-flow: wrap;
+    justify-content: space-evenly;
+  }
