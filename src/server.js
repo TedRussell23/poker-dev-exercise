@@ -3,7 +3,6 @@ const hapi = require("hapi");
 const inert = require("inert");
 const vision = require("vision");
 const Ejs = require("ejs");
-const pkg = require("../package");
 const routes = require("./routes");
 
 // Configure the server
@@ -35,7 +34,7 @@ const init = async () => {
   });
   server.views({
     engines: { ejs: Ejs },
-    path: __dirname + "/views",
+    path: `${__dirname}/views`,
     layout: "layout"
   });
   await server.route(routes);

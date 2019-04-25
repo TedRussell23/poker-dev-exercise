@@ -6,6 +6,7 @@ const gamePlayHandler = require("./handlers/gamePlay");
 const cardsHandler = require("./handlers/cards");
 const exchangeCheckHandler = require("./handlers/exchangeCheck");
 const resultHandler = require("./handlers/result");
+const processExchangeHandler = require("./handlers/processExchange");
 
 module.exports = [
   {
@@ -39,6 +40,11 @@ module.exports = [
         }
       }
     }
+  },
+  {
+    method: "POST",
+    path: "/games/{gameId}/processExchange",
+    handler: processExchangeHandler
   },
   {
     method: "GET",

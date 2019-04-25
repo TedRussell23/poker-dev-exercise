@@ -1,4 +1,5 @@
 const uuidv4 = require("uuid/v4");
+const { Hand } = require("pokersolver");
 
 let games = {};
 
@@ -49,11 +50,71 @@ const allPlayersExchanged = gameId => {
   );
 };
 
+const determineWinner = gameId => {
+  try {
+    const { players } = getGame(gameId);
+    const hands = [];
+    // console.log(players);
+
+    // Create hands required for api
+    Object.keys(players).forEach(key => {
+      const cardsArr = [];
+      players[key].cards.forEach(card => {
+        cardsArr.push(card.code);
+      });
+      hands.push(Hand.solve(cardsArr));
+    });
+
+    // console.log(hands);
+    const winner = Hand.winners(hands); // calculates winner
+    // console.log(winner);
+
+    // TODO: Turn this into a generic model for losers and winners
+    const winningPlayer = {
+      key: "",
+      player: {},
+      description: winner[0].descr
+    };
+
+    //  match winning hand with game players from api result
+    Object.keys(players).forEach(key => {
+      players[key].cards.forEach(c1 => {
+        winner[0].cardPool.forEach(c2 => {
+          if (
+            c2.value + c2.suit.toLowerCase() ===
+            c1.value + c2.suit.toLowerCase()
+          ) {
+            winningPlayer.player = players[key];
+            winningPlayer.key = key;
+          }
+        });
+      });
+    });
+
+    // create a list of losers
+    const losingPlayersKeys = Object.keys(players).filter(
+      pk => players[pk] !== players[winningPlayer.key]
+    );
+    const losingPlayers = [];
+    losingPlayersKeys.forEach(key => {
+      losingPlayers.push({ [key]: players[key] });
+    });
+
+    return {
+      losers: losingPlayers,
+      winner: winningPlayer
+    };
+  } catch (error) {
+    return error.message;
+  }
+};
+
 module.exports = {
   saveNewGame,
   getGame,
   updateGame,
   addPlayer,
   allPlayersJoined,
-  allPlayersExchanged
+  allPlayersExchanged,
+  determineWinner
 };

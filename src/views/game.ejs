@@ -1,19 +1,161 @@
 <h3>Your hand:</h3>
 
+<div class="game-container">
+  <div class="hand-container"></div>
+  <div class="burn-container">
+    <div>
+      <h3>5 Card Poker</h3>
+      <h4>It's like poker but easier</h4>
+    </div>
+    <div class="burn-btn">Burn selected cards</div>
+  </div>
+</div>
+
 <script>
+
+  //*** Vars ***
   const gameId = '<%= gameId %>';
+  var PlayersHand = [];
+  var uiPlayersHandContainer = {}; //Element for main entry point
 
-  // Fetch the current users cards here from `/games/${gameId}/cards`
+  //*** Model *** (Resembles API data)
+  function PlayingCard(imageUrl, code, value, suit) {
+    this.code = code;
+    this.image = imageUrl;
+    this.value = value;
+    this.suit = suit;
+    this.discard = false;
+  }
 
-
-
-  const checkExchangeStatus = function(){
-    $.ajax(`/games/${gameId}/allExchanged`).done(function(data, textStatus, xhr){
+  //*** API ***
+  //lambda expressions are not compatible with Internet Explorer but for the purposes of this exercise I have assumed this will be okay.
+  async function getPlayersHand() {
+    console.log('Drawing cards...')
+    return await $.ajax(`/games/${gameId}/cards`, {
+      dataType: 'json',
+      timeout: 2000
+    }).done((data, status, xhr) => {
+      drawPlayingHand(data);
+    }).fail((error) => {
+      console.error('Error: ' + error.message);
+    });
+  }
+  function ProcessBurntCards() {
+    $.ajax({
+      url: `/games/${gameId}/processExchange`,
+      dataType: `json`,
+      type: `post`,
+      contentType: `application/json`,
+      data: JSON.stringify(PlayersHand),
+      processData: false
+    }).done((data, textStatus, xhr) => {
+      //Return the updated players hand
+      PlayersHand = data;
+      console.log(data);
+      resetHand();
+      drawPlayingHand(data);
+      disableBurnButton();
+    });
+  };
+  const checkExchangeStatus = function () {
+    $.ajax(`/games/${gameId}/allExchanged`).done(function (data, textStatus, xhr) {
       if (xhr.status !== 202) { // not pending
         document.location = `/games/${gameId}/result`;
       }
     })
   }
+
+
+  //*** UI controls ***
+  function toggleDiscard(idx) {
+    const element = document.getElementsByClassName("discard-btn")[idx];
+    PlayersHand[idx].discard = !PlayersHand[idx].discard;
+    PlayersHand[idx].discard ? element.style.backgroundColor = "#F00" : element.style.backgroundColor = "#FFF"
+  }
+  function drawDiscardButton(idx) {
+    const discardContainer = document.createElement("div");
+    const discardBtn = document.createElement("div");
+    const text = document.createElement("h4");
+
+    discardContainer.className = "discard-container";
+    discardBtn.className = "discard-btn";
+    text.className = "discard-text";
+    text.innerText = "Discard";
+
+    discardBtn.onclick = () => {
+      toggleDiscard(idx);
+    };
+
+    discardContainer.appendChild(discardBtn);
+    discardContainer.appendChild(text);
+
+    return discardContainer;
+  }
+  function drawPlayingCard(card, idx) {
+    const cardContainer = document.createElement("div");
+    cardContainer.className = "card-container";
+
+    const playingCard = document.createElement("div");
+    playingCard.className = "playing-card";
+
+    const discardContainer = drawDiscardButton(idx);
+
+    playingCard.onclick = () => {
+      toggleDiscard(idx);
+    }
+
+    let img = document.createElement("img");
+    img.src = card.image;
+    playingCard.appendChild(img);
+
+    cardContainer.appendChild(playingCard);
+    cardContainer.appendChild(discardContainer);
+
+    addCardToHand(cardContainer);
+    return playingCard;
+  }
+  function addCardToHand(card) {
+    uiPlayersHandContainer.appendChild(card);
+  }
+  function uiClearCards() {
+    uiPlayersHandContainer.innerHTML = "";
+  }
+  function resetHand() {
+    uiClearCards();
+    PlayersHand = [];
+  }
+  function drawPlayingHand(data) {
+    //ResetHand
+    resetHand();
+    //Draw player hand
+    data.forEach((card, idx) => {
+      try {
+        let temp = new PlayingCard(card.image, card.code, card.value, card.suit);
+        PlayersHand.push(temp);
+        drawPlayingCard(temp, idx);
+      }
+      catch (ex) {
+        console.error(ex.message);
+      }
+    });
+  }
+  function disableBurnButton(){
+    const burnButton = document.getElementsByClassName("burn-btn")[0];
+    burnButton.removeAttribute('onlick');
+    burnButton.style.backgroundColor = '#696969';
+  }
+  
+  //*** Initialise ***
+  (() => {
+    uiPlayersHandContainer = document.getElementsByClassName('hand-container')[0];
+    getPlayersHand();
+
+    const burnBtn = document.getElementsByClassName('burn-btn')[0];
+    burnBtn.onclick = () => {
+      //TODO: Process burnt cards
+      ProcessBurntCards();
+    };
+  })();
 
   setInterval(checkExchangeStatus, 1000);
 </script>

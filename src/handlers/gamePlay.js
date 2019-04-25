@@ -22,17 +22,23 @@ const gamePlayHandler = async (req, h) => {
 
   // All players have joined
   const deckId = game.deck.id;
+  // Draw cards from deck
   const apiUrl = `https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=${game.numPlayers *
     5}`;
+
   return axios
     .get(apiUrl)
     .then(res => res.data.cards)
     .then(cards => chunk(cards, 5))
     .then(hands => {
-      Object.keys(players).forEach(
-        (playerId, idx) => (players[playerId].cards = hands[idx])
-      );
+      // This is where the players cards are set
+      Object.keys(players).forEach((playerId, idx) => {
+        players[playerId].cards = hands[idx];
+      });
+
+      // Clone games object and appends players with updated hands
       const newGameState = { ...game, players };
+
       updateGame(gameId, newGameState);
     })
     .then(() => h.view("game", { gameId }));

@@ -6,6 +6,7 @@
   const checkGameStatus = function(){
     var gameUrl = '/games/<%= gameId %>';
     $.ajax(gameUrl).done(function(data){
+      console.log(data);
       if (data.indexOf('Waiting for other players') === -1) { // not pending
         document.location = gameUrl;
       }

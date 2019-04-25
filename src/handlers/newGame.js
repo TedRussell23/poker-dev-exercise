@@ -5,6 +5,7 @@ const newGameHandler = async (req, h) =>
   axios
     .get("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1")
     .then(res => {
+      // eslint-disable-next-line camelcase
       const { deck_id, remaining } = res.data;
       return { id: deck_id, remaining };
     })

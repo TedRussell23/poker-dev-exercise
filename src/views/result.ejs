@@ -1,1 +1,23 @@
+<div class="status"></div>
+
 <h3>The winner is: </h3>
+<div class="winning-hand-container"></div>
+<h3>The losers: </h3>
+<div class="losing-hand-container">
+
+</div>
+
+<script>
+  const results = '<%= results %>';
+  const isWinner = "<%= isWinner %>";
+
+  //*** UI Containers ***
+  var losingHandContainer = {};
+  var winningHandContainer = {};
+
+  //*** Initialise ***
+  (() => {
+    const status = document.getElementsByClassName("status")[0];
+    isWinner ? status.innerHTML = "<h2>You won! :D</h2>" : status.innerHTML = "<h2>You lost! :(</h2>"
+  })();
+</script>
